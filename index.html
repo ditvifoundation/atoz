@@ -1,1 +1,547 @@
-# atoz
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>AR || A TO Z Alphabates</title>
+    <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <script src="https://unpkg.com/aframe-html-shader@1.5.0/dist/aframe-html-shader.min.js"></script>
+    <script src="https://raw.githack.com/fcor/arjs-gestures/master/dist/gestures.js"></script>
+
+  
+
+    <script>
+        AFRAME.registerComponent('marker-sound', {
+            init: function() {
+                this.marker = this.el;  // marker element
+                this.audio = this.el.querySelector('a-sound').components.sound;  // sound component
+                
+                this.marker.addEventListener('markerFound', () => {
+                    // Play sound when marker is found
+                    if (this.audio) {
+                        this.audio.playSound();
+                    }
+                });
+                
+                this.marker.addEventListener('markerLost', () => {
+                    // Pause sound when marker is lost
+                    if (this.audio) {
+                        this.audio.pauseSound();
+                    }
+                });
+            }
+        });
+        </script>
+
+    <script>
+        AFRAME.registerComponent('smooth', {
+            schema: {
+                smoothCount: { type: 'number', default: 10 },
+                smoothTolerance: { type: 'number', default: 0.01 },
+                smoothThreshold: { type: 'number', default: 2 },
+            },
+
+            init: function () {
+                this.previousPosition = new THREE.Vector3();
+                this.previousRotation = new THREE.Euler();
+                this.previousVisible = false;
+                this.positions = [];
+                this.rotations = [];
+            },
+
+            tick: function () {
+                const marker = this.el;
+                const object3D = marker.object3D;
+                const { smoothCount, smoothTolerance, smoothThreshold } = this.data;
+
+                if (!object3D.visible && this.previousVisible) {
+                    // Store last known position when marker disappears
+                    object3D.position.copy(this.previousPosition);
+                    object3D.rotation.copy(this.previousRotation);
+                } else if (object3D.visible) {
+                    // Position smoothing
+                    this.positions.push(object3D.position.clone());
+                    if (this.positions.length > smoothCount) {
+                        this.positions.shift();
+                    }
+
+                    // Rotation smoothing
+                    this.rotations.push(new THREE.Euler().copy(object3D.rotation));
+                    if (this.rotations.length > smoothCount) {
+                        this.rotations.shift();
+                    }
+
+                    if (this.positions.length >= smoothCount) {
+                        // Apply smoothing
+                        const smoothedPosition = new THREE.Vector3();
+                        const smoothedRotation = new THREE.Euler();
+
+                        // Average positions
+                        this.positions.forEach(pos => smoothedPosition.add(pos));
+                        smoothedPosition.divideScalar(this.positions.length);
+
+                        // Average rotations
+                        this.rotations.forEach(rot => {
+                            smoothedRotation.x += rot.x;
+                            smoothedRotation.y += rot.y;
+                            smoothedRotation.z += rot.z;
+                        });
+                        smoothedRotation.x /= this.rotations.length;
+                        smoothedRotation.y /= this.rotations.length;
+                        smoothedRotation.z /= this.rotations.length;
+
+                        // Apply smoothed values if change is within tolerance
+                        if (smoothedPosition.distanceTo(object3D.position) < smoothThreshold) {
+                            object3D.position.lerp(smoothedPosition, smoothTolerance);
+                            object3D.rotation.set(
+                                THREE.MathUtils.lerp(object3D.rotation.x, smoothedRotation.x, smoothTolerance),
+                                THREE.MathUtils.lerp(object3D.rotation.y, smoothedRotation.y, smoothTolerance),
+                                THREE.MathUtils.lerp(object3D.rotation.z, smoothedRotation.z, smoothTolerance)
+                            );
+                        }
+                    }
+
+                    // Store current values
+                    this.previousPosition.copy(object3D.position);
+                    this.previousRotation.copy(object3D.rotation);
+                }
+                this.previousVisible = object3D.visible;
+            }
+        });
+    </script>
+
+    <script>
+        AFRAME.registerComponent('play-all-model-animations', {
+            init: function () {
+                this.model = null;
+                this.mixer = null;
+
+                var model = this.el.getObject3D('mesh');
+                if (model) {
+                    this.load(model);
+                } else {
+                    this.el.addEventListener('model-loaded', e => {
+                        this.load(e.detail.model);
+                    });
+                }
+            },
+
+            load: function (model) {
+                this.model = model;
+                this.mixer = new THREE.AnimationMixer(model);
+
+                if (this.model.animations.length) {
+                    this.model.animations.forEach(animation => {
+                        let action = this.mixer.clipAction(animation);
+                        action.play();
+                    });
+                }
+            },
+
+            tick: function (t, dt) {
+                if (this.mixer) {
+                    this.mixer.update(dt / 1000);
+                }
+            }
+        });
+    </script>
+
+
+    <script>
+        AFRAME.registerComponent('gesture-handler', {
+            schema: {
+                enabled: { default: true },
+                rotationFactor: { default: 5 },
+                minScale: { default: 0.3 },
+                maxScale: { default: 8 },
+            },
+
+            init: function () {
+                this.handleScale = this.handleScale.bind(this);
+                this.handleRotation = this.handleRotation.bind(this);
+
+                this.isVisible = false;
+                this.initialScale = this.el.object3D.scale.clone();
+                this.scaleFactor = 1;
+
+                this.el.sceneEl.addEventListener("markerFound", (e) => {
+                    this.isVisible = true;
+                });
+
+                this.el.sceneEl.addEventListener("markerLost", (e) => {
+                    this.isVisible = false;
+                });
+            },
+
+            handleRotation: function (event) {
+                if (this.isVisible) {
+                    this.el.object3D.rotation.y +=
+                        event.detail.positionChange.x * this.data.rotationFactor;
+                    this.el.object3D.rotation.x +=
+                        event.detail.positionChange.y * this.data.rotationFactor;
+                }
+            },
+
+            handleScale: function (event) {
+                if (this.isVisible) {
+                    this.scaleFactor *=
+                        1 + event.detail.spreadChange / event.detail.startSpread;
+
+                    this.scaleFactor = Math.min(
+                        Math.max(this.scaleFactor, this.data.minScale),
+                        this.data.maxScale
+                    );
+
+                    this.el.object3D.scale.x = this.scaleFactor * this.initialScale.x;
+                    this.el.object3D.scale.y = this.scaleFactor * this.initialScale.y;
+                    this.el.object3D.scale.z = this.scaleFactor * this.initialScale.z;
+                }
+            },
+        });
+
+
+
+
+    </script>
+
+
+</head>
+
+<body>
+
+
+
+
+       <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; patternRatio:0.80"
+        gesture-detector renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true;">
+
+
+        <a-light type="ambient" intensity="0.8"></a-light>
+        <a-light type="directional" position="1 1 1" intensity="0.8" color="#FFF">
+        </a-light>
+
+
+        <!-- Apple -->
+        <a-marker id="apple-marker" persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-apple.patt?v=1742372195501">
+            <a-entity position="0 0 0" scale="0.3 0.3 0.3" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/apple.glb?v=1742370358039">
+            </a-entity>
+        </a-marker>
+         
+         
+           <!-- Butterfly -->
+        <a-marker id="ball-marker" persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-butterfly.patt?v=1742372191200">
+            <a-entity position="0 0 0" scale="0.025 0.025 0.025" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/butterfly.glb?v=1742370339337">
+            </a-entity>
+        </a-marker>
+
+        <!-- Cat -->
+<!--         <a-marker id="cat-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/pattern-cat.patt?v=1741692920487">
+            <a-entity position="0 0 0" scale="1.5 1.5 1.5" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/cat.glb?v=1741687242136">
+            </a-entity>
+            <a-sound
+                src="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/cat-meow-8-fx-306184.mp3?v=1741467434044"
+                autoplay="false" loop="true" position="0 0 0" volume="1.0"></a-sound>
+        </a-marker> -->
+      
+             <!-- dog -->
+        <a-marker id="dog-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-dog.patt?v=1742372201214">
+            <a-entity position="0 0 0" scale="0.25 0.25 0.25" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/dog.glb?v=1742370408332">
+            </a-entity>
+
+        </a-marker>
+      
+      
+       <!-- elephant -->
+        <a-marker id="elephant-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-elephant.patt?v=1742372205545">
+            <a-entity position="0 0 0" scale="0.5 0.5 0.5" rotation="-90 20 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/elephant.glb?v=1742370463390">
+            </a-entity>
+
+        </a-marker>
+      
+      
+      <!-- Football -->
+        <a-marker id="football-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-football.patt?v=1742372210501">
+            <a-entity position="0 0 0" scale="0.2 0.2 0.2" rotation="0 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/football.glb?v=1742370383530">
+            </a-entity>
+
+        </a-marker>
+      
+      
+      
+      <!-- Guitar -->
+<!--         <a-marker id="guitar-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/pattern-guitar.patt?v=1741698491873">
+            <a-entity position="0 0 0" scale="0.8 0.8 0.8" rotation="0 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/guitar.glb?v=1741611703462">
+            </a-entity>
+        </a-marker> -->
+
+      
+      
+       <!-- Horse -->
+        <a-marker id="horse-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-horse.patt?v=1742372219245">
+            <a-entity position="0 0 0" scale="0.5 0.5 0.5" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/horse.glb?v=1742371679144">
+            </a-entity>
+
+        </a-marker>
+  
+      
+      <!-- ice-cream -->
+        <a-marker id="ice-cream-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-ice-cream.patt?v=1742372220875">
+            <a-entity position="0 0 0" scale="0.5 0.5 0.5" rotation="0 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/ice-cream.glb?v=1742370406821">
+            </a-entity>
+
+        </a-marker>
+
+      
+      
+        <!-- jeep -->
+        <a-marker id="jeep-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-jeep.patt?v=1742372241647">
+            <a-entity position="0 0 0" scale="0.3 0.3 0.3" rotation="180 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/jeep.glb?v=1742371706633">
+            </a-entity>
+
+        </a-marker>
+         
+         
+          <!-- key -->
+<!--         <a-marker id="key-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/pattern-key.patt?v=1741859456266">
+            <a-entity position="0 0 0" scale="0.3 0.3 0.3" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/key.glb?v=1741859504495">
+            </a-entity>
+
+        </a-marker> -->
+      
+      
+      
+            <!-- lion -->
+        <a-marker id="lion-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-lion.patt?v=1742372248631">
+            <a-entity position="0 0 0" scale="0.005 0.005 0.005" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/lion.glb?v=1742370436567">
+            </a-entity>
+
+        </a-marker>
+      
+      
+              <!-- mango -->
+        <a-marker id="mango-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-mango.patt?v=1742372248184">
+            <a-entity position="0 0 0" scale="0.6 0.6 0.6" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/mango.glb?v=1742371736607">
+            </a-entity>
+
+        </a-marker>
+      
+      
+      
+                    <!-- nest -->
+        <a-marker id="nest-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-nest.patt?v=1742372248756">
+            <a-entity position="0 0 0" scale="5 5 5" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/nest.glb?v=1742370417277">
+            </a-entity>
+
+        </a-marker>
+      
+      
+      <!-- orange -->
+        <a-marker id="orange-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-orange.patt?v=1742372256595">
+            <a-entity position="0 0 0" scale="0.3 0.3 0.3" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/orange.glb?v=1742371768415">
+            </a-entity>
+
+        </a-marker>
+      
+      
+           <!-- penguin -->
+        <a-marker id="penguin-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-penguin.patt?v=1742372256773">
+            <a-entity position="0 0 0" scale="0.02 0.02 0.02" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/penguin.glb?v=1741676991622">
+            </a-entity>
+
+        </a-marker>
+      
+      
+            <!-- quack -->
+        <a-marker id="quack-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-quack.patt?v=1742372261765">
+            <a-entity position="0 0 0" scale="0.5 0.5 0.5" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/quack.glb?v=1742371902777">
+            </a-entity>
+
+        </a-marker>
+      
+      
+        <!-- rose -->
+        <a-marker id="rose-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-rose.patt?v=1742372267089">
+            <a-entity position="0 0 0" scale="0.8 0.8 0.8" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/rose.glb?v=1742370349684">
+            </a-entity>
+
+        </a-marker>
+      
+      
+      
+              <!-- snowman -->
+        <a-marker id="snowman-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-snowman.patt?v=1742372276107">
+            <a-entity position="0 0 0" scale="3.2 3.2 3.2" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/snowman.glb?v=1742371791306">
+            </a-entity>
+
+        </a-marker>
+      
+      
+              <!-- tiger -->
+        <a-marker id="tiger-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-tiger.patt?v=1742372286647">
+            <a-entity position="0 0 0" scale="0.026 0.026 0.026" rotation="180 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/tiger.glb?v=1742371931567">
+            </a-entity>
+
+        </a-marker>
+      
+      
+        <!-- umbrella -->
+        <a-marker id="umbrella-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-umbrella.patt?v=1742372286648">
+            <a-entity position="0 0 0" scale="0.6 0.6 0.6" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/umbrella.glb?v=1742371873553">
+            </a-entity>
+
+        </a-marker>
+      
+      
+              <!-- violin -->
+        <a-marker id="violin-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-violin.patt?v=1742372313303">
+            <a-entity position="0 0 0" scale="0.6 0.6 0.6" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/violin.glb?v=1742370424474">
+            </a-entity>
+
+        </a-marker>
+      
+      
+          <!-- watermelon -->
+        <a-marker id="watermelon-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-watermelon.patt?v=1742372294681">
+            <a-entity position="0 0 0" scale="0.4 0.4 0.4" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/watermelon.glb?v=1742371954144">
+            </a-entity>
+
+        </a-marker>
+      
+      
+        <!-- xmas -->
+        <a-marker id="xmas-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-xmas.patt?v=1742372287786">
+            <a-entity position="0 0 0" scale="0.2 0.2 0.2" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/xmas.glb?v=1742370348689">
+            </a-entity>
+
+        </a-marker>
+      
+      
+           <!-- yacht -->
+<!--         <a-marker id="yacht-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/pattern-yatch.patt?v=1741813572759">
+            <a-entity position="0 0 0" scale="0.4 0.4 0.4" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/yatch.glb?v=1741813568223">
+            </a-entity>
+
+        </a-marker> -->
+      
+      
+              <!-- zebra -->
+        <a-marker id="zebra-marker" marker-sound persistent-marker type="pattern"
+            smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
+            url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-zebra.patt?v=1742372294994">
+            <a-entity position="0 0 0" scale="0.35 0.35 0.35" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/zebra.glb?v=1742372030359">
+            </a-entity>
+
+        </a-marker>
+
+  
+
+
+
+        <a-entity camera></a-entity>
+    </a-scene>
+</body>
+
+</html>
