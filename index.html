@@ -2,28 +2,60 @@
 <html>
 
 <head>
-  <title>AR || A TO Z Alphabates</title>
     <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
     <script src="https://unpkg.com/aframe-html-shader@1.5.0/dist/aframe-html-shader.min.js"></script>
     <script src="https://raw.githack.com/fcor/arjs-gestures/master/dist/gestures.js"></script>
 
-  
+
+
+
+    <script>
+        AFRAME.registerSystem('loading-screen', {
+            init: function () {
+                this.loadingScreen = document.querySelector('#loading-screen');
+                this.loadedAssets = 0;
+                this.totalAssets = document.querySelectorAll('a-entity[gltf-model]').length;
+
+                this.el.addEventListener('model-loaded', () => {
+                    this.loadedAssets++;
+                    if (this.loadedAssets >= this.totalAssets) {
+                        this.hideLoadingScreen();
+                    }
+                });
+            },
+
+            hideLoadingScreen: function () {
+                if (this.loadingScreen) {
+                    this.loadingScreen.style.display = 'none';
+                }
+            }
+        });
+
+        // Add error handling for model loading
+        AFRAME.registerComponent('model-error', {
+            init: function () {
+                this.el.addEventListener('model-error', (e) => {
+                    console.error('Model loading failed:', e.detail.src);
+                });
+            }
+        });
+    </script>
 
     <script>
         AFRAME.registerComponent('marker-sound', {
-            init: function() {
+            init: function () {
                 this.marker = this.el;  // marker element
                 this.audio = this.el.querySelector('a-sound').components.sound;  // sound component
-                
+
                 this.marker.addEventListener('markerFound', () => {
                     // Play sound when marker is found
                     if (this.audio) {
                         this.audio.playSound();
                     }
                 });
-                
+
                 this.marker.addEventListener('markerLost', () => {
                     // Pause sound when marker is lost
                     if (this.audio) {
@@ -32,7 +64,7 @@
                 });
             }
         });
-        </script>
+    </script>
 
     <script>
         AFRAME.registerComponent('smooth', {
@@ -205,20 +237,65 @@
 
     </script>
 
+    <style>
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            animation: rotation 1s linear infinite;
+        }
+
+        .loading-text {
+            color: white;
+            margin-top: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg)
+            }
+
+            100% {
+                transform: rotate(360deg)
+            }
+        }
+    </style>
+
 
 </head>
 
 <body>
 
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <div class="loading-text">Loading AR Resources...</div>
+    </div>
 
 
+    <a-scene embedded loading-screen
+        arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; patternRatio:0.80" gesture-detector
+        renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true;">
 
-       <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; patternRatio:0.80"
-        gesture-detector renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true;">
 
-
-        <a-light type="ambient" intensity="0.8"></a-light>
-        <a-light type="directional" position="1 1 1" intensity="0.8" color="#FFF">
+        <a-light type="ambient" intensity="4"></a-light>
+        <a-light type="directional" position="1 1 1" intensity="4" color="#FFF">
         </a-light>
 
 
@@ -226,14 +303,14 @@
         <a-marker id="apple-marker" persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-apple.patt?v=1742372195501">
-            <a-entity position="0 0 0" scale="0.3 0.3 0.3" rotation="-90 0 0" animation-mixer class="clickable"
+            <a-entity position="0 0 0" scale="0.03 0.03 0.03" rotation="-90 0 0" animation-mixer class="clickable"
                 gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
-                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/apple.glb?v=1742370358039">
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/apple2.0.glb?v=1742400660303">
             </a-entity>
         </a-marker>
-         
-         
-           <!-- Butterfly -->
+
+
+        <!-- Butterfly -->
         <a-marker id="ball-marker" persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-butterfly.patt?v=1742372191200">
@@ -244,7 +321,7 @@
         </a-marker>
 
         <!-- Cat -->
-<!--         <a-marker id="cat-marker" marker-sound persistent-marker type="pattern"
+        <!--         <a-marker id="cat-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/pattern-cat.patt?v=1741692920487">
             <a-entity position="0 0 0" scale="1.5 1.5 1.5" rotation="-90 0 0" animation-mixer class="clickable"
@@ -255,8 +332,8 @@
                 src="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/cat-meow-8-fx-306184.mp3?v=1741467434044"
                 autoplay="false" loop="true" position="0 0 0" volume="1.0"></a-sound>
         </a-marker> -->
-      
-             <!-- dog -->
+
+        <!-- dog -->
         <a-marker id="dog-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-dog.patt?v=1742372201214">
@@ -266,9 +343,9 @@
             </a-entity>
 
         </a-marker>
-      
-      
-       <!-- elephant -->
+
+
+        <!-- elephant -->
         <a-marker id="elephant-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-elephant.patt?v=1742372205545">
@@ -278,9 +355,9 @@
             </a-entity>
 
         </a-marker>
-      
-      
-      <!-- Football -->
+
+
+        <!-- Football -->
         <a-marker id="football-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-football.patt?v=1742372210501">
@@ -290,22 +367,22 @@
             </a-entity>
 
         </a-marker>
-      
-      
-      
-      <!-- Guitar -->
-<!--         <a-marker id="guitar-marker" marker-sound persistent-marker type="pattern"
+
+
+
+        <!-- Guitar -->
+                <a-marker id="guitar-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/pattern-guitar.patt?v=1741698491873">
-            <a-entity position="0 0 0" scale="0.8 0.8 0.8" rotation="0 0 0" animation-mixer class="clickable"
+            <a-entity position="0 0 0" scale="1 1 1" rotation="-90 0 0" animation-mixer class="clickable"
                 gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
-                gltf-model="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/guitar.glb?v=1741611703462">
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/guitars.glb?v=1742393514847">
             </a-entity>
-        </a-marker> -->
+        </a-marker>
 
-      
-      
-       <!-- Horse -->
+
+
+        <!-- Horse -->
         <a-marker id="horse-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-horse.patt?v=1742372219245">
@@ -315,9 +392,9 @@
             </a-entity>
 
         </a-marker>
-  
-      
-      <!-- ice-cream -->
+
+
+        <!-- ice-cream -->
         <a-marker id="ice-cream-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-ice-cream.patt?v=1742372220875">
@@ -328,8 +405,8 @@
 
         </a-marker>
 
-      
-      
+
+
         <!-- jeep -->
         <a-marker id="jeep-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
@@ -340,22 +417,22 @@
             </a-entity>
 
         </a-marker>
-         
-         
-          <!-- key -->
-<!--         <a-marker id="key-marker" marker-sound persistent-marker type="pattern"
+
+
+        <!-- key -->
+                <a-marker id="key-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/pattern-key.patt?v=1741859456266">
             <a-entity position="0 0 0" scale="0.3 0.3 0.3" rotation="-90 0 0" animation-mixer class="clickable"
                 gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
-                gltf-model="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/key.glb?v=1741859504495">
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/key.glb?v=1742384447195">
             </a-entity>
 
-        </a-marker> -->
-      
-      
-      
-            <!-- lion -->
+        </a-marker>
+
+
+
+        <!-- lion -->
         <a-marker id="lion-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-lion.patt?v=1742372248631">
@@ -365,9 +442,9 @@
             </a-entity>
 
         </a-marker>
-      
-      
-              <!-- mango -->
+
+
+        <!-- mango -->
         <a-marker id="mango-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-mango.patt?v=1742372248184">
@@ -377,10 +454,10 @@
             </a-entity>
 
         </a-marker>
-      
-      
-      
-                    <!-- nest -->
+
+
+
+        <!-- nest -->
         <a-marker id="nest-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-nest.patt?v=1742372248756">
@@ -390,9 +467,9 @@
             </a-entity>
 
         </a-marker>
-      
-      
-      <!-- orange -->
+
+
+        <!-- orange -->
         <a-marker id="orange-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-orange.patt?v=1742372256595">
@@ -402,9 +479,9 @@
             </a-entity>
 
         </a-marker>
-      
-      
-           <!-- penguin -->
+
+
+        <!-- penguin -->
         <a-marker id="penguin-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-penguin.patt?v=1742372256773">
@@ -414,9 +491,9 @@
             </a-entity>
 
         </a-marker>
-      
-      
-            <!-- quack -->
+
+
+        <!-- quack -->
         <a-marker id="quack-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-quack.patt?v=1742372261765">
@@ -426,8 +503,8 @@
             </a-entity>
 
         </a-marker>
-      
-      
+
+
         <!-- rose -->
         <a-marker id="rose-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
@@ -438,10 +515,10 @@
             </a-entity>
 
         </a-marker>
-      
-      
-      
-              <!-- snowman -->
+
+
+
+        <!-- snowman -->
         <a-marker id="snowman-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-snowman.patt?v=1742372276107">
@@ -451,9 +528,9 @@
             </a-entity>
 
         </a-marker>
-      
-      
-              <!-- tiger -->
+
+
+        <!-- tiger -->
         <a-marker id="tiger-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-tiger.patt?v=1742372286647">
@@ -463,8 +540,8 @@
             </a-entity>
 
         </a-marker>
-      
-      
+
+
         <!-- umbrella -->
         <a-marker id="umbrella-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
@@ -475,9 +552,9 @@
             </a-entity>
 
         </a-marker>
-      
-      
-              <!-- violin -->
+
+
+        <!-- violin -->
         <a-marker id="violin-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-violin.patt?v=1742372313303">
@@ -487,9 +564,9 @@
             </a-entity>
 
         </a-marker>
-      
-      
-          <!-- watermelon -->
+
+
+        <!-- watermelon -->
         <a-marker id="watermelon-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-watermelon.patt?v=1742372294681">
@@ -499,8 +576,8 @@
             </a-entity>
 
         </a-marker>
-      
-      
+
+
         <!-- xmas -->
         <a-marker id="xmas-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
@@ -511,21 +588,21 @@
             </a-entity>
 
         </a-marker>
-      
-      
-           <!-- yacht -->
-<!--         <a-marker id="yacht-marker" marker-sound persistent-marker type="pattern"
+
+
+        <!-- yacht -->
+                <a-marker id="yacht-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/pattern-yatch.patt?v=1741813572759">
-            <a-entity position="0 0 0" scale="0.4 0.4 0.4" rotation="-90 0 0" animation-mixer class="clickable"
+            <a-entity position="0 0 0" scale="0.03 0.03 0.03" rotation="-90 0 0" animation-mixer class="clickable"
                 gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
-                gltf-model="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/yatch.glb?v=1741813568223">
+                gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/yatch.glb?v=1742399466045">
             </a-entity>
 
-        </a-marker> -->
-      
-      
-              <!-- zebra -->
+        </a-marker>
+
+
+        <!-- zebra -->
         <a-marker id="zebra-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-zebra.patt?v=1742372294994">
@@ -535,9 +612,6 @@
             </a-entity>
 
         </a-marker>
-
-  
-
 
 
         <a-entity camera></a-entity>
