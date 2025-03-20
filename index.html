@@ -20,39 +20,39 @@
                 this.totalModels = document.querySelectorAll('a-entity[gltf-model]').length;
                 this.totalSounds = document.querySelectorAll('a-sound').length;
                 this.totalAssets = this.totalModels + this.totalSounds;
-
+                
                 // Track model loading
                 const modelEntities = document.querySelectorAll('a-entity[gltf-model]');
                 modelEntities.forEach(entity => {
                     entity.addEventListener('model-loaded', () => this.assetLoaded('model'));
                 });
-
+        
                 // Track audio loading
                 const soundEntities = document.querySelectorAll('a-sound');
                 soundEntities.forEach(sound => {
                     sound.addEventListener('sound-loaded', () => this.assetLoaded('sound'));
                 });
-
+        
                 // Fallback timeout
                 setTimeout(() => {
                     this.hideLoadingScreen();
                 }, 5000);
             },
-
+        
             assetLoaded: function (type) {
                 this.loadedAssets++;
                 const progress = Math.round((this.loadedAssets / this.totalAssets) * 100);
-
+                
                 if (this.progressText) {
                     this.progressText.textContent = `${progress}%`;
                 }
                 console.log(`Loaded ${type}: ${this.loadedAssets}/${this.totalAssets} (${progress}%)`);
-
+        
                 if (this.loadedAssets >= this.totalAssets) {
                     this.hideLoadingScreen();
                 }
             },
-
+        
             hideLoadingScreen: function () {
                 if (this.loadingScreen && this.loadingScreen.style.display !== 'none') {
                     console.log('All resources loaded, hiding loading screen');
@@ -60,14 +60,14 @@
                 }
             }
         });
-
+        
         // Add error handling for model and sound loading
         AFRAME.registerComponent('asset-error', {
             init: function () {
                 this.el.addEventListener('model-error', (e) => {
                     console.error('Model loading failed:', e.detail.src);
                 });
-
+                
                 if (this.el.components.sound) {
                     this.el.addEventListener('sound-error', (e) => {
                         console.error('Sound loading failed:', e.detail.src);
@@ -75,9 +75,9 @@
                 }
             }
         });
-    </script>
+        </script>
 
- <script>
+    <script>
         AFRAME.registerComponent('marker-sound', {
             init: function () {
                 this.marker = this.el;  // marker element
@@ -342,13 +342,12 @@
         <a-marker id="apple-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-apple.patt?v=1742372195501">
-            <a-entity asset-error position="0 0 0" scale="0.03 0.03 0.03" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.03 0.03 0.03" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/apple2.0.glb?v=1742400660303">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/A.mp3?v=1742413840505"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/A.mp3?v=1742413840505"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -356,13 +355,12 @@
         <a-marker id="ball-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-butterfly.patt?v=1742372191200">
-            <a-entity asset-error position="0 0 0" scale="0.025 0.025 0.025" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0"scale="0.025 0.025 0.025" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/butterfly.glb?v=1742370339337">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/Butterfly.mp3?v=1742415131349"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/Butterfly.mp3?v=1742415131349"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
         <!-- Cat -->
@@ -375,7 +373,7 @@
             </a-entity>
        <a-sound asset-error 
               src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/Cat.mp3?v=1742415134573"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
             
         </a-marker> -->
 
@@ -383,13 +381,12 @@
         <a-marker id="dog-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-dog.patt?v=1742372201214">
-            <a-entity asset-error position="0 0 0" scale="0.25 0.25 0.25" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.25 0.25 0.25" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/dog.glb?v=1742370408332">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/dog.mp3?v=1742415138990"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/dog.mp3?v=1742415138990"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -397,13 +394,12 @@
         <a-marker id="elephant-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-elephant.patt?v=1742372205545">
-            <a-entity asset-error position="0 0 0" scale="0.5 0.5 0.5" rotation="-90 20 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.5 0.5 0.5" rotation="-90 20 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/elephant.glb?v=1742370463390">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/elephant.mp3?v=1742415144186"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/elephant.mp3?v=1742415144186"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -411,13 +407,12 @@
         <a-marker id="football-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-football.patt?v=1742372210501">
-            <a-entity asset-error position="0 0 0" scale="0.2 0.2 0.2" rotation="0 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.2 0.2 0.2" rotation="0 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/football.glb?v=1742370383530">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/football.mp3?v=1742415148557"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/football.mp3?v=1742415148557"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -430,9 +425,8 @@
                 gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/guitars.glb?v=1742393514847">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/guitar.mp3?v=1742415154330"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/guitar.mp3?v=1742415154330"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -441,13 +435,12 @@
         <a-marker id="horse-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-horse.patt?v=1742372219245">
-            <a-entity asset-error position="0 0 0" scale="0.5 0.5 0.5" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.5 0.5 0.5" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/horse.glb?v=1742371679144">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/Horse.mp3?v=1742415159429"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/Horse.mp3?v=1742415159429"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -455,13 +448,12 @@
         <a-marker id="ice-cream-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-ice-cream.patt?v=1742372220875">
-            <a-entity asset-error position="0 0 0" scale="0.5 0.5 0.5" rotation="0 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.5 0.5 0.5" rotation="0 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/ice-cream.glb?v=1742370406821">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/Ice-cream.mp3?v=1742415163752"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/Ice-cream.mp3?v=1742415163752"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -470,13 +462,12 @@
         <a-marker id="jeep-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-jeep.patt?v=1742372241647">
-            <a-entity asset-error position="0 0 0" scale="0.3 0.3 0.3" rotation="180 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.3 0.3 0.3" rotation="180 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/jeep.glb?v=1742371706633">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/jeep.mp3?v=1742415169696"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/jeep.mp3?v=1742415169696"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -484,13 +475,12 @@
         <a-marker id="key-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/pattern-key.patt?v=1741859456266">
-            <a-entity asset-error position="0 0 0" scale="0.3 0.3 0.3" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.3 0.3 0.3" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/key.glb?v=1742384447195">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/A.mp3?v=1742413840505"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/A.mp3?v=1742413840505"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -499,13 +489,12 @@
         <a-marker id="lion-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-lion.patt?v=1742372248631">
-            <a-entity asset-error position="0 0 0" scale="0.005 0.005 0.005" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.005 0.005 0.005" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/lion.glb?v=1742370436567">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/lion.mp3?v=1742415173803"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/lion.mp3?v=1742415173803"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -513,13 +502,12 @@
         <a-marker id="mango-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-mango.patt?v=1742372248184">
-            <a-entity asset-error position="0 0 0" scale="0.6 0.6 0.6" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.6 0.6 0.6" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/mango.glb?v=1742371736607">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/Mango.mp3?v=1742415177751"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/Mango.mp3?v=1742415177751"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -532,9 +520,8 @@
                 gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/nest.glb?v=1742370417277">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/nest.mp3?v=1742415182284"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/nest.mp3?v=1742415182284"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -542,13 +529,12 @@
         <a-marker id="orange-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-orange.patt?v=1742372256595">
-            <a-entity asset-error position="0 0 0" scale="0.3 0.3 0.3" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.3 0.3 0.3" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/orange.glb?v=1742371768415">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/Orange.mp3?v=1742415186591"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/Orange.mp3?v=1742415186591"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -556,13 +542,12 @@
         <a-marker id="penguin-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-penguin.patt?v=1742372256773">
-            <a-entity asset-error position="0 0 0" scale="0.02 0.02 0.02" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.02 0.02 0.02" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/penguin.glb?v=1741676991622">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/penguin.mp3?v=1742415194001"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/penguin.mp3?v=1742415194001"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -570,13 +555,12 @@
         <a-marker id="quack-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-quack.patt?v=1742372261765">
-            <a-entity asset-error position="0 0 0" scale="0.5 0.5 0.5" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.5 0.5 0.5" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/quack.glb?v=1742371902777">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/quack.mp3?v=1742415197730"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/quack.mp3?v=1742415197730"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -584,13 +568,12 @@
         <a-marker id="rose-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-rose.patt?v=1742372267089">
-            <a-entity asset-error position="0 0 0" scale="0.8 0.8 0.8" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.8 0.8 0.8" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/rose.glb?v=1742370349684">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/rose.mp3?v=1742415206516"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/rose.mp3?v=1742415206516"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -599,13 +582,12 @@
         <a-marker id="snowman-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-snowman.patt?v=1742372276107">
-            <a-entity asset-error position="0 0 0" scale="3.2 3.2 3.2" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="3.2 3.2 3.2" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/snowman.glb?v=1742371791306">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/snowman.mp3?v=1742415210655"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/snowman.mp3?v=1742415210655"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -613,13 +595,12 @@
         <a-marker id="tiger-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-tiger.patt?v=1742372286647">
-            <a-entity asset-error position="0 0 0" scale="0.026 0.026 0.026" rotation="180 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.026 0.026 0.026" rotation="180 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/tiger.glb?v=1742371931567">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/tiger.mp3?v=1742415214946"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/tiger.mp3?v=1742415214946"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -627,13 +608,12 @@
         <a-marker id="umbrella-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-umbrella.patt?v=1742372286648">
-            <a-entity asset-error position="0 0 0" scale="0.6 0.6 0.6" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.6 0.6 0.6" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/umbrella.glb?v=1742371873553">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/umbrella.mp3?v=1742415220029"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/umbrella.mp3?v=1742415220029"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -641,13 +621,12 @@
         <a-marker id="violin-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-violin.patt?v=1742372313303">
-            <a-entity asset-error position="0 0 0" scale="0.6 0.6 0.6" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.6 0.6 0.6" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/violin.glb?v=1742370424474">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/violin.mp3?v=1742415225033"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/violin.mp3?v=1742415225033"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -655,13 +634,12 @@
         <a-marker id="watermelon-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-watermelon.patt?v=1742372294681">
-            <a-entity asset-error position="0 0 0" scale="0.4 0.4 0.4" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.4 0.4 0.4" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/watermelon.glb?v=1742371954144">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/watermelon.mp3?v=1742415229398"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/watermelon.mp3?v=1742415229398"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -669,13 +647,12 @@
         <a-marker id="xmas-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-xmas.patt?v=1742372287786">
-            <a-entity asset-error position="0 0 0" scale="0.2 0.2 0.2" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.2 0.2 0.2" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/xmas.glb?v=1742370348689">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/xmas.mp3?v=1742415233855"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/xmas.mp3?v=1742415233855"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -683,13 +660,12 @@
         <a-marker id="yacht-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/a5706bbe-b8cc-48d3-a3e2-19c6a43998ec/pattern-yatch.patt?v=1741813572759">
-            <a-entity asset-error position="0 0 0" scale="0.03 0.03 0.03" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.03 0.03 0.03" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/yatch.glb?v=1742399466045">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/yacht.mp3?v=1742415237952"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/yacht.mp3?v=1742415237952"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
@@ -697,13 +673,12 @@
         <a-marker id="zebra-marker" marker-sound persistent-marker type="pattern"
             smooth="smoothCount: 10; smoothTolerance: 0.01; smoothThreshold: 2"
             url="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/pattern-zebra.patt?v=1742372294994">
-            <a-entity asset-error position="0 0 0" scale="0.35 0.35 0.35" rotation="-90 0 0" animation-mixer
-                class="clickable" gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
+            <a-entity asset-error position="0 0 0" scale="0.35 0.35 0.35" rotation="-90 0 0" animation-mixer class="clickable"
+                gesture-handler="minScale: 0.05; maxScale: 10; rotationFactor: 5"
                 gltf-model="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/zebra.glb?v=1742372030359">
             </a-entity>
-            <a-sound asset-error
-                src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/zebra.mp3?v=1742415242700"
-                autoplay="false" loop="false" position="0 0 0" volume="1.0"></a-sound>
+            <a-sound asset-error src="https://cdn.glitch.global/6311379f-f618-45ed-b172-9477e7695553/zebra.mp3?v=1742415242700"
+                autoplay="false" loop="false" position="0 0 0" volume="7.0"></a-sound>
         </a-marker>
 
 
